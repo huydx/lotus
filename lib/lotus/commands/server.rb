@@ -1,4 +1,5 @@
 require 'rack'
+require 'lotus/logger'
 
 module Lotus
   module Commands
