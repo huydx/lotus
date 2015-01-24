@@ -33,9 +33,27 @@ module Lotus
       # which is the cause of Safari content-length bugs.
       def middleware
         mw = Hash.new { |e, m| e[m] = [] }
-        mw["deployment"].concat([::Rack::ContentLength, ::Rack::CommonLogger])
+        mw["deployment"].concat([::Rack::ContentLength, Lotus::RackLogger])
         mw["development"].concat(mw["deployment"] + [::Rack::ShowExceptions, ::Rack::Lint])
         mw
+      end
+
+      class Lotus::RackLogger < Lotus::Logger
+        def call(env)
+          self.info(message_for(request))
+        end
+
+        def app_tag
+          'HttpServer'
+        end
+
+        private
+        def message_for(request)
+          'Started %s "%s" for %s' % [
+            request.request_method,
+            request.filtered_path,
+            request.ip]
+        end
       end
 
       def start
